@@ -518,8 +518,12 @@ def run_dating_bot():
                     
         else:
             if current_partner and current_partner not in skipped_partners:
-                print(f"[Bot] User manually skipped '{current_partner}'. Learning male pattern...")
-                learn_male_pattern(current_partner)
+                partner_skipped = any("partner has skipped" in a.lower() or "partner skipped" in a.lower() or "has skipped" in a.lower() for a in alerts)
+                if partner_skipped:
+                    print(f"[Bot] Partner skipped '{current_partner}'. Skipping pattern learning.")
+                else:
+                    print(f"[Bot] User manually skipped '{current_partner}'. Learning male pattern...")
+                    learn_male_pattern(current_partner)
                 track_skipped(current_partner, recently_skipped)
             current_partner = ""
             skipped_partners.clear() # Reset since we left chat
