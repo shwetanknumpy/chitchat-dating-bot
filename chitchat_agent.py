@@ -392,11 +392,16 @@ def classify_stranger(name, page_text, recently_skipped=[]):
 def is_user_manually_chatting(messages):
     opener = "hey fella ! wassup"
     second_msg = "yo, what name do u go by? 👀"
+    third_msg = "love that name ✨ wassup? where u texting from? 👀"
+    fourth_msg = "oh nice! high key wanna visit there someday ✨ what u up to right now? 👀"
+    
+    bot_messages = {opener, second_msg, third_msg, fourth_msg}
+    
     me_msgs = [m for m in messages if m["sender"] == "Me"]
     for m in me_msgs:
-        if m["text"] != opener and m["text"] != second_msg:
+        if m["text"] not in bot_messages:
             return True
-    if len(me_msgs) > 2:
+    if len(me_msgs) > 4:
         return True
     return False
 
@@ -486,13 +491,28 @@ def run_dating_bot():
                             break
                             
                     if not skipped_any:
-                        # 2. If no male signal, check if we need to send Gen Z name-ask message
-                        # We sent exactly 1 message (opener) and the partner replied!
-                        if len(me_msgs) == 1 and len(stranger_msgs) >= 1:
-                            opener = "hey fella ! wassup"
-                            if me_msgs[0]["text"] == opener:
-                                print(f"[Bot] Partner replied: '{stranger_msgs[-1]}'. Asking for name in Gen Z style...")
+                        # 2. Dynamic 4-turn Gen Z conversation flow progression
+                        # Turn 2: We sent opener, partner replied 1st time
+                        if len(me_msgs) == 1 and len(stranger_msgs) == 1:
+                            if me_msgs[0]["text"] == "hey fella ! wassup":
+                                print(f"[Bot] Partner replied: '{stranger_msgs[0]}'. Sending Turn 2: Name ask...")
                                 send_result = send_message(ws_url, "yo, what name do u go by? 👀")
+                                print(f"[Bot] {send_result}")
+                                print("==================================================")
+                                
+                        # Turn 3: We sent name ask, partner replied 2nd time
+                        elif len(me_msgs) == 2 and len(stranger_msgs) == 2:
+                            if me_msgs[1]["text"] == "yo, what name do u go by? 👀":
+                                print(f"[Bot] Partner replied: '{stranger_msgs[1]}'. Sending Turn 3: Location ask...")
+                                send_result = send_message(ws_url, "love that name ✨ wassup? where u texting from? 👀")
+                                print(f"[Bot] {send_result}")
+                                print("==================================================")
+                                
+                        # Turn 4: We sent location ask, partner replied 3rd time
+                        elif len(me_msgs) == 3 and len(stranger_msgs) == 3:
+                            if me_msgs[2]["text"] == "love that name ✨ wassup? where u texting from? 👀":
+                                print(f"[Bot] Partner replied: '{stranger_msgs[2]}'. Sending Turn 4: Activity ask...")
+                                send_result = send_message(ws_url, "oh nice! high key wanna visit there someday ✨ what u up to right now? 👀")
                                 print(f"[Bot] {send_result}")
                                 print("==================================================")
                     
